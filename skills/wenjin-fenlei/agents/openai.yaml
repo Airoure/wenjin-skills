@@ -1,5 +1,5 @@
 interface:
-  display_name: "wenjin:fenlei"
+  display_name: "Wenjin:fenlei"
   short_description: "按用途整理问津目录中未分类的 Skill，并补充检索标签"
   default_prompt: "用 $wenjin-fenlei 整理问津当前收录条目的分类。"
 

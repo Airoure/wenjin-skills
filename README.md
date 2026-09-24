@@ -36,7 +36,7 @@ Agent 会按用途给未分类条目选一个主分类、补一至三个标签�
 
 导航与收录规则在 [skills/wenjin/SKILL.md](skills/wenjin/SKILL.md)。整个 `skills/wenjin` 文件夹是一件 Skill。将它放入目标 Agent 的个人 Skill 目录即可使用：Codex 为 `~/.agents/skills/`，Claude Code 为 `~/.claude/skills/`，Cursor 为 `~/.cursor/skills/`（Cursor 也读取 `~/.agents/skills/`）。不同 Agent 的自动选择和调用其他 Skill 的能力可能不同；问津始终可以给出推荐理由和来源链接。
 
-在 Codex 中想用分类快捷入口，可将 [skills/wenjin-fenlei](skills/wenjin-fenlei/SKILL.md) 也放入与 `wenjin` 相同的 Skill 目录。在输入框键入 `/`，搜索并选择 `wenjin:fenlei`；也可输入 `$wenjin-fenlei`。该入口会按问津的规则整理当前未分类条目。
+在 Codex 中想用分类快捷入口，可将 [skills/wenjin-fenlei](skills/wenjin-fenlei/SKILL.md) 也放入与 `wenjin` 相同的 Skill 目录。在输入框键入 `/`，搜索并选择 `Wenjin:fenlei`；也可输入 `$wenjin-fenlei`。该入口会按问津的规则整理当前未分类条目。
 
 通过问津实际试用一件尚未安装的 Skill 后，Agent 会询问你是否将它加入当前项目或个人的 Skill 目录，也可以选择暂不添加。仅收录或推荐不会触发安装；临时使用所需的文件或工具无法取得时，Agent 会先说明原因。
 
