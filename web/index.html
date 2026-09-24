@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="__WENJIN_TOKEN__">
+  <title>问津 · 收录一件好工具</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="问津首页"><span class="brand-mark">津</span><span>问津 <small>WENJIN</small></span></a>
+      <span class="local-mark"><span class="local-dot"></span>仅在本机运行</span>
+    </header>
+
+    <main class="layout">
+      <aside class="intro">
+        <div class="intro-top">
+          <p class="eyebrow">你的方法收藏，有路可寻</p>
+          <h1>为好方法<br><em>留一个渡口。</em></h1>
+          <p class="intro-copy">粘贴一个 Skill 链接。问津帮你读出基本信息，你来确认它值得在什么时候出现。</p>
+        </div>
+
+        <div class="route" aria-label="收录步骤">
+          <div class="route-line"></div>
+          <div class="route-step"><span>一</span><div><strong>贴上链接</strong><small>GitHub 仓库或 SKILL.md</small></div></div>
+          <div class="route-step"><span>二</span><div><strong>确认场景</strong><small>补上你的用法与边界</small></div></div>
+          <div class="route-step"><span>三</span><div><strong>存入问津</strong><small>作为候选，等待真实试用</small></div></div>
+        </div>
+
+        <div class="intro-foot"><span class="foot-rule"></span>收录是给未来的自己留路标。</div>
+      </aside>
+
+      <div class="workspace">
+        <section class="capture panel" aria-labelledby="capture-title">
+          <div class="panel-heading">
+            <div><p class="section-kicker">新建候选卡片</p><h2 id="capture-title">收录一件 Skill</h2></div>
+            <span class="panel-seal" aria-hidden="true">录</span>
+          </div>
+          <p class="panel-help">先贴来源，自动读取名称与说明。其他网站也可以手动填写。</p>
+          <form id="source-form" class="source-form">
+            <label for="source-url">来源链接</label>
+            <div class="source-row">
+              <input id="source-url" name="url" type="url" inputmode="url" placeholder="https://github.com/作者/仓库" required autocomplete="url">
+              <button type="submit" id="inspect-button" class="primary-button">读取链接 <span aria-hidden="true">↗</span></button>
+            </div>
+          </form>
+          <button type="button" id="manual-button" class="text-button">不是 GitHub 链接？手动填写 <span aria-hidden="true">→</span></button>
+          <div id="source-message" class="message" role="status" aria-live="polite" hidden></div>
+          <div id="choice-panel" class="choice-panel" hidden>
+            <label for="skill-choice">这个仓库有多件 Skill，请选一件</label>
+            <select id="skill-choice"></select>
+            <button type="button" id="choose-button" class="secondary-button">读取这件 Skill</button>
+          </div>
+        </section>
+
+        <section id="draft-panel" class="draft panel" aria-labelledby="draft-title" hidden>
+          <div class="panel-heading">
+            <div><p class="section-kicker">校对后保存</p><h2 id="draft-title">候选卡片</h2></div>
+            <span class="draft-status">候选</span>
+          </div>
+          <p class="panel-help">自动读取的文字只是草稿。最值得填写的是“适用场景”和“什么时候不用”。</p>
+          <form id="draft-form">
+            <div class="form-grid">
+              <div class="field"><label for="skill-name">名称 <span>*</span></label><input id="skill-name" name="name" maxlength="100" required></div>
+              <div class="field"><label for="skill-author">作者</label><input id="skill-author" name="author" maxlength="200" placeholder="不确定可留空"></div>
+              <div class="field full"><label for="skill-source">具体来源 <span>*</span></label><input id="skill-source" name="source" type="url" maxlength="1000" required></div>
+              <div class="field full"><label for="skill-when">什么时候用 <span>*</span></label><textarea id="skill-when" name="when" rows="2" maxlength="500" required placeholder="用自己的话描述一个会遇到的场景"></textarea></div>
+              <div class="field full"><label for="skill-not-when">什么时候不用</label><textarea id="skill-not-when" name="not_when" rows="2" maxlength="500" placeholder="写清相似但不适合的情况，未来更容易选对"></textarea></div>
+              <div class="field full"><label for="skill-trigger">我会这样提问</label><input id="skill-trigger" name="trigger" maxlength="500" placeholder="例如：这个方案还有什么没想清楚？"></div>
+              <details class="advanced full">
+                <summary>版本、许可与使用笔记 <span aria-hidden="true">⌄</span></summary>
+                <div class="form-grid advanced-grid">
+                  <div class="field"><label for="skill-version">固定版本</label><input id="skill-version" name="version" maxlength="100" placeholder="提交 SHA 或未核实"></div>
+                  <div class="field"><label for="skill-license">许可</label><input id="skill-license" name="license" maxlength="500" placeholder="未核实"></div>
+                  <div class="field full"><label for="skill-behavior">所需工具与行为</label><input id="skill-behavior" name="behavior" maxlength="500" placeholder="联网、读文件、写文件等；不确定可留空"></div>
+                  <div class="field full"><label for="skill-entry">使用入口</label><input id="skill-entry" name="entry" maxlength="500" placeholder="Skill 名称或调用入口"></div>
+                  <div class="field full"><label for="skill-notes">试用笔记</label><textarea id="skill-notes" name="notes" rows="2" maxlength="500" placeholder="候选阶段可以留空"></textarea></div>
+                </div>
+              </details>
+            </div>
+            <div class="form-actions">
+              <button type="submit" id="save-button" class="primary-button">存入问津 <span aria-hidden="true">↗</span></button>
+              <span>保存为候选；不会安装或运行外部 Skill。</span>
+            </div>
+          </form>
+          <div id="save-message" class="message" role="status" aria-live="polite" hidden></div>
+        </section>
+
+        <section class="collection panel" aria-labelledby="collection-title">
+          <div class="panel-heading collection-head"><div><p class="section-kicker">已经留存的路标</p><h2 id="collection-title">我的目录 <span id="entry-count">0</span></h2></div></div>
+          <div class="collection-tools">
+            <p>新收录的 Skill 暂列“未分类”。对 Agent 说“用问津整理分类”；整理完成后刷新页面查看。</p>
+            <label for="category-filter">按分类查看</label>
+            <select id="category-filter"><option value="">全部分类</option></select>
+          </div>
+          <div id="entry-list" class="entry-list"><p class="empty-state">目录还是空的。从上面的第一条链接开始。</p></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
