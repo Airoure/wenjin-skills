@@ -143,6 +143,8 @@ function renderEntries() {
 
 async function refreshEntries() {
   try {
+    const setup = await api("/api/setup", {});
+    if (!setup.ok) message(sourceMessage, setup.message, true);
     const data = await api("/api/entries");
     allEntries = data.entries;
     const selected = categoryFilter.value;

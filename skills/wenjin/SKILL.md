@@ -5,7 +5,7 @@ description: 在个人目录中寻找、收录和整理提示词或 Agent Skill�
 
 # 问津
 
-使用个人目录 `~/.wenjin/catalog.md` 作为条目的唯一来源；仓库中的 [空白模板](references/catalog.example.md) 只用于新建目录。只有用户想从个人收藏中找方法、收录来源或维护目录时才使用问津；普通任务直接完成。
+使用个人目录 `~/.wenjin/catalog.md` 作为条目的唯一来源；仓库中的 [空白模板](references/catalog.example.md) 只用于新建目录。只有用户想从个人收藏中找方法、收录来源或维护目录时才使用问津；普通任务直接完成。每次开始前运行 [首次配置脚本](scripts/setup_catalog.py)：它会用当前登录的 `gh` 账号连接或创建私有 `wenjin-catalog`，换设备时先取回已有目录。失败时按脚本提示引导安装 Git / `gh` 或运行 `gh auth login`；若本地目录仍可读取，可继续本地操作，但必须说明云端未就绪。
 
 ## 找方法
 

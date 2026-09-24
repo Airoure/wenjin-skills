@@ -10,6 +10,7 @@ import re
 import secrets
 import sys
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -19,6 +20,7 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "skills" / "wenjin" / "scripts"))
 from sync_catalog import sync_catalog
+from setup_catalog import setup_catalog
 
 WEB = ROOT / "web"
 CATALOG = Path.home() / ".wenjin" / "catalog.md"
@@ -27,12 +29,23 @@ MAX_BODY = 32_768
 MAX_GITHUB_RESPONSE = 4_000_000
 WRITE_LOCK = threading.Lock()
 SAVE_SYNC_LOCK = threading.Lock()
+SETUP_CACHE = None
 TOKEN = secrets.token_urlsafe(32)
 REPO_PART = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
 class AppError(Exception):
     pass
+
+
+def prepare_catalog() -> dict:
+    global SETUP_CACHE
+    now = time.monotonic()
+    if SETUP_CACHE and SETUP_CACHE[0] == CATALOG and now - SETUP_CACHE[1] < 60:
+        return SETUP_CACHE[2]
+    result = setup_catalog(CATALOG)
+    SETUP_CACHE = (CATALOG, now, result) if result["ok"] else None
+    return result
 
 
 def github_json(url: str) -> dict:
@@ -303,7 +316,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json(403, {"error": "仅允许从本机页面访问。"})
             return
         if self.path == "/api/entries":
-            self._json(200, {"entries": entries_from_catalog()})
+            with SAVE_SYNC_LOCK:
+                self._json(200, {"entries": entries_from_catalog()})
             return
         files = {
             "/": ("index.html", "text/html; charset=utf-8"),
@@ -331,12 +345,21 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length).decode("utf-8"))
             if not isinstance(data, dict):
                 raise AppError("表单数据格式不正确。")
-            if self.path == "/api/inspect":
+            if self.path == "/api/setup":
+                with SAVE_SYNC_LOCK:
+                    result = prepare_catalog()
+            elif self.path == "/api/inspect":
                 result = inspect_github(str(data.get("url", "")), data.get("path"))
             elif self.path == "/api/save":
                 with SAVE_SYNC_LOCK:
+                    setup = prepare_catalog()
+                    if not setup["ok"] and not CATALOG.is_file():
+                        raise AppError(str(setup["message"]))
                     result = save_entry(data)
-                    result["sync"] = sync_catalog(CATALOG)
+                    result["sync"] = sync_catalog(CATALOG) if setup["ok"] else {
+                        "ok": False,
+                        "message": f"已保存在本地，未同步到 GitHub：{setup['message']}",
+                    }
             else:
                 self._json(404, {"error": "接口不存在。"})
                 return

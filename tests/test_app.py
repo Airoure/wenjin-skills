@@ -2,6 +2,7 @@ import base64
 import json
 import threading
 from http.server import ThreadingHTTPServer
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 import tempfile
 import unittest
@@ -90,11 +91,14 @@ class CatalogTests(unittest.TestCase):
                     "X-Wenjin-Token": app.TOKEN,
                 },
             )
-            with patch.object(app, "sync_catalog", return_value={"ok": True, "message": "已同步。"}) as sync:
+            with patch.object(app, "setup_catalog", return_value={"ok": True, "message": "已就绪。"}) as setup, patch.object(
+                app, "sync_catalog", return_value={"ok": True, "message": "已同步。"}
+            ) as sync:
                 with urlopen(request) as response:
                     saved = json.load(response)
             self.assertEqual(saved["status"], "候选")
             self.assertEqual(saved["sync"], {"ok": True, "message": "已同步。"})
+            setup.assert_called_once_with(self.catalog)
             sync.assert_called_once_with(self.catalog)
             self.assertEqual(len(app.entries_from_catalog()), 1)
         finally:
@@ -106,6 +110,53 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(app.AppError, "https"):
             app.save_entry({"name": "坏链接", "source": "javascript:alert(1)", "when": "测试"})
         self.assertEqual(app.entries_from_catalog(), [])
+
+    def test_web_save_guides_setup_when_catalog_is_missing(self):
+        self.catalog.unlink()
+        server = ThreadingHTTPServer(("127.0.0.1", 0), app.Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            request = Request(
+                f"http://127.0.0.1:{server.server_port}/api/save",
+                data=json.dumps({
+                    "name": "新条目", "source": "https://github.com/example/skill",
+                    "when": "测试首次配置",
+                }).encode("utf-8"),
+                headers={"Content-Type": "application/json", "X-Wenjin-Token": app.TOKEN},
+            )
+            with patch.object(app, "setup_catalog", return_value={"ok": False, "message": "请运行 gh auth login"}):
+                with self.assertRaises(HTTPError) as raised:
+                    urlopen(request)
+            self.assertEqual(raised.exception.code, 400)
+            self.assertIn("gh auth login", json.load(raised.exception)["error"])
+            self.assertFalse(self.catalog.exists())
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
+    def test_web_setup_runs_on_authenticated_post_not_catalog_get(self):
+        server = ThreadingHTTPServer(("127.0.0.1", 0), app.Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            url = f"http://127.0.0.1:{server.server_port}"
+            with patch.object(app, "setup_catalog", return_value={"ok": True, "message": "已就绪。"}) as setup:
+                with urlopen(url + "/api/entries") as response:
+                    self.assertEqual(json.load(response)["entries"], [])
+                setup.assert_not_called()
+                request = Request(
+                    url + "/api/setup", data=b"{}",
+                    headers={"Content-Type": "application/json", "X-Wenjin-Token": app.TOKEN},
+                )
+                with urlopen(request) as response:
+                    self.assertEqual(json.load(response)["ok"], True)
+                setup.assert_called_once_with(self.catalog)
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
 
 
 class GithubInspectTests(unittest.TestCase):
