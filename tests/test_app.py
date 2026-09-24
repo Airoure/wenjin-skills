@@ -90,9 +90,12 @@ class CatalogTests(unittest.TestCase):
                     "X-Wenjin-Token": app.TOKEN,
                 },
             )
-            with urlopen(request) as response:
-                saved = json.load(response)
+            with patch.object(app, "sync_catalog", return_value={"ok": True, "message": "已同步。"}) as sync:
+                with urlopen(request) as response:
+                    saved = json.load(response)
             self.assertEqual(saved["status"], "候选")
+            self.assertEqual(saved["sync"], {"ok": True, "message": "已同步。"})
+            sync.assert_called_once_with(self.catalog)
             self.assertEqual(len(app.entries_from_catalog()), 1)
         finally:
             server.shutdown()

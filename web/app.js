@@ -165,8 +165,9 @@ draftForm.addEventListener("submit", async (event) => {
   try {
     const data = Object.fromEntries(new FormData(draftForm).entries());
     const saved = await api("/api/save", data);
-    message(saveMessage, `已收录「${saved.name}」，状态为候选。现在可以继续收录下一件。`);
-    message(sourceMessage, `已收录「${saved.name}」，状态为候选。可以继续收录下一件。`);
+    const status = `已收录「${saved.name}」，状态为候选。${saved.sync.message}`;
+    message(saveMessage, status, !saved.sync.ok);
+    message(sourceMessage, status, !saved.sync.ok);
     await refreshEntries();
     sourceInput.value = "";
     draftPanel.hidden = true;

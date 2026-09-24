@@ -8,6 +8,7 @@ import base64
 import json
 import re
 import secrets
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -16,12 +17,16 @@ from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT / "skills" / "wenjin" / "scripts"))
+from sync_catalog import sync_catalog
+
 WEB = ROOT / "web"
 CATALOG = Path.home() / ".wenjin" / "catalog.md"
 CATALOG_TEMPLATE = ROOT / "skills" / "wenjin" / "references" / "catalog.example.md"
 MAX_BODY = 32_768
 MAX_GITHUB_RESPONSE = 4_000_000
 WRITE_LOCK = threading.Lock()
+SAVE_SYNC_LOCK = threading.Lock()
 TOKEN = secrets.token_urlsafe(32)
 REPO_PART = re.compile(r"^[A-Za-z0-9_.-]+$")
 
@@ -329,7 +334,9 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/api/inspect":
                 result = inspect_github(str(data.get("url", "")), data.get("path"))
             elif self.path == "/api/save":
-                result = save_entry(data)
+                with SAVE_SYNC_LOCK:
+                    result = save_entry(data)
+                    result["sync"] = sync_catalog(CATALOG)
             else:
                 self._json(404, {"error": "接口不存在。"})
                 return
