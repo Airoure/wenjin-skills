@@ -2,7 +2,11 @@
 
 > 遇事寻法，不必记名。
 
-问津是一个个人提示词与 Agent Skill 导航目录。你描述当前处境，它从已收录的条目中找出适合的一项；看到值得留下的 Skill，也可以通过本地网页表单收录。
+问津是一个个人提示词与 Agent Skill 导航目录。你描述当前处境，它从已收录的条目中找出适合的一项；看到值得留下的 Skill，可以直接在 Codex 收录，也可以使用本地网页表单。
+
+## 直接在 Codex 收录
+
+在输入框键入 `/`，搜索并选择 `Wenjin:shoulu`，然后贴上要收录的链接；也可以直接说“用问津收录这个链接：……”或输入 `$wenjin-shoulu`。Agent 会按问津的规则检查来源，并把条目写入 `~/.wenjin/catalog.md`。这条路径无需启动本地网页，也不会自动安装外部 Skill。个人目录的 GitHub 同步仍需单独提交、推送。
 
 ## 打开收录表单
 
@@ -36,7 +40,7 @@ Agent 会按用途给未分类条目选一个主分类、补一至三个标签�
 
 导航与收录规则在 [skills/wenjin/SKILL.md](skills/wenjin/SKILL.md)。整个 `skills/wenjin` 文件夹是一件 Skill。将它放入目标 Agent 的个人 Skill 目录即可使用：Codex 为 `~/.agents/skills/`，Claude Code 为 `~/.claude/skills/`，Cursor 为 `~/.cursor/skills/`（Cursor 也读取 `~/.agents/skills/`）。不同 Agent 的自动选择和调用其他 Skill 的能力可能不同；问津始终可以给出推荐理由和来源链接。
 
-在 Codex 中想用分类快捷入口，可将 [skills/wenjin-fenlei](skills/wenjin-fenlei/SKILL.md) 也放入与 `wenjin` 相同的 Skill 目录。在输入框键入 `/`，搜索并选择 `Wenjin:fenlei`；也可输入 `$wenjin-fenlei`。该入口会按问津的规则整理当前未分类条目。
+在 Codex 中想用快捷入口，可将 [分类](skills/wenjin-fenlei/SKILL.md) 和 [收录](skills/wenjin-shoulu/SKILL.md) 两件 Skill 也放入与 `wenjin` 相同的目录。在输入框键入 `/` 后分别搜索 `Wenjin:fenlei` 或 `Wenjin:shoulu`；分类也可输入 `$wenjin-fenlei`。分类入口会按问津的规则整理当前未分类条目。
 
 通过问津实际试用一件尚未安装的 Skill 后，Agent 会询问你是否将它加入当前项目或个人的 Skill 目录，也可以选择暂不添加。仅收录或推荐不会触发安装；临时使用所需的文件或工具无法取得时，Agent 会先说明原因。
 
